@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.net.SocketException
+import java.net.UnknownHostException
 
 interface SafeApiCall {
     suspend fun <T> safeApiCall(apiCall: suspend () -> T): Resource<T> {
@@ -16,6 +17,10 @@ interface SafeApiCall {
 
                     is SocketException -> {
                         Resource.Failure(true, 555, null)
+                    }
+
+                    is UnknownHostException -> {
+                        Resource.Failure(false, 111, null)
                     }
                     is HttpException -> {
                         Resource.Failure(false, throwable.code(), throwable.response()?.errorBody())

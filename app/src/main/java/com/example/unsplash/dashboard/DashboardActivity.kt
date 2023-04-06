@@ -50,7 +50,7 @@ class DashboardActivity : AppCompatActivity() {
                     dashboardAdapter.notifyDataSetChanged()
                 }
                 is Resource.Failure -> handleApiError(it) {
-
+                    binding.progressBarPage.visibility=View.GONE
                 }
                 else -> {
 

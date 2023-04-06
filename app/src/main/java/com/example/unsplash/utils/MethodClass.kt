@@ -19,6 +19,15 @@ fun Context.handleApiError(
     when {
         failure.isNetworkError -> {
             toast("Something went wrong!!")
+            if (retry != null) {
+                retry()
+            }
+        }
+        failure.errorCode == 111 ->{
+            toast("Please check your internet connectivity")
+            if (retry != null) {
+                retry()
+            }
         }
         else -> {
             toast("Something went wrong")
