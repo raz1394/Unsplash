@@ -45,6 +45,7 @@ class DashboardActivity : AppCompatActivity() {
         dashboardViewModel.getImagesResponse.observe(this) {
             when (it) {
                 is Resource.Success -> {
+                    binding.progressBarPage.visibility=View.GONE
                     dashboardViewModel.addItems(it.value)
                     dashboardAdapter.notifyDataSetChanged()
                 }
@@ -58,7 +59,7 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         binding.nested.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-            // on scroll change we are checking when users scroll as bottom.
+            // on scroll change we are checking when users scroll.
             if (scrollY == v.getChildAt(0).measuredHeight - v.measuredHeight) {
                 // in this method we are incrementing page number,
                 // making progress bar visible and calling get data method.
