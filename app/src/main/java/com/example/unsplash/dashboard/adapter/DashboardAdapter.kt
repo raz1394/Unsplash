@@ -1,74 +1,63 @@
 package com.example.unsplash.dashboard.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.unsplash.R
-import com.example.unsplash.dashboard.datamodel.UnsplashDataModel
+import com.example.unsplash.dashboard.datamodel.UnsplashDataItemsModel
+import com.example.unsplash.databinding.UnsplashRowListBinding
+import com.example.unsplash.utils.ItemListener
 
 
-class RecyclerViewAdapter(var imageList: List<UnsplashDataModel?>?) :
-    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val VIEW_TYPE_ITEM = 0
-    private val VIEW_TYPE_LOADING = 1
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return if (viewType == VIEW_TYPE_ITEM) {
-            val view: View =
-                LayoutInflater.from(parent.context).inflate(R.layout.unsplash_row_list, parent, false)
-            ItemViewHolder(view)
-        } else {
-            val view: View =
-                LayoutInflater.from(parent.context).inflate(R.layout.progress_bar, parent, false)
-            LoadingViewHolder(view)
-        }
-    }
+class DashboardAdapter(
+    private val context: Context,
+    private val imageList: ArrayList<UnsplashDataItemsModel>,
+    private val itemListener: ItemListener
+) : RecyclerView.Adapter<DashboardAdapter.RecyclerViewHolder>() {
 
-    override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
-        if (viewHolder is ItemViewHolder) {
-            populateItemRows(viewHolder, position)
-        } else if (viewHolder is LoadingViewHolder) {
-            showLoadingView(viewHolder, position)
-        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerViewHolder {
+        return RecyclerViewHolder(
+            UnsplashRowListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
     }
 
     override fun getItemCount(): Int {
-        return if (imageList == null) 0 else imageList!!.size
+        return imageList.size
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (imageList!![position] == null) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
+    override fun onBindViewHolder(holder: RecyclerViewHolder, position: Int) {
+        holder.setDataToViews(position)
     }
 
-    private inner class ItemViewHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView) {
-        var authorTv: TextView
-        var unsplashImage: ImageView
+    inner class RecyclerViewHolder(private val binding: UnsplashRowListBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun setDataToViews(position: Int) {
+            binding.idAuthorTv.text = "Image ID: ${imageList[position].id}"
+            binding.imageAuthorTv.text = "Author Name: ${imageList[position].author}"
+            Glide.with(context)
+                .load(imageList[position].downloadUrl)
+                .disallowHardwareConfig()
+                .placeholder(R.drawable.splash_icon)
+                .into(binding.imageView)
 
-        init {
-            authorTv = itemView.findViewById(R.id.imageAuthorTv)
-            unsplashImage = itemView.findViewById(R.id.imageView)
+            binding.downloadImage.setOnClickListener {
+                itemListener.onItemClick(
+                    position,
+                    imageList,
+                    "download"
+                )
+            }
+
+            binding.linearLayout.setOnClickListener {
+                itemListener.onItemClick(
+                    position,
+                    imageList,
+                    "view"
+                )
+            }
         }
-    }
-
-    private inner class LoadingViewHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView) {
-        var progressBar: ProgressBar
-
-        init {
-            progressBar = itemView.findViewById(R.id.progressBar)
-        }
-    }
-
-    private fun showLoadingView(viewHolder: LoadingViewHolder, position: Int) {
-        //ProgressBar would be displayed
-    }
-
-    private fun populateItemRows(viewHolder: ItemViewHolder, position: Int) {
-        val item = imageList!![position]
-        viewHolder.authorTv.text = item?.author
     }
 }

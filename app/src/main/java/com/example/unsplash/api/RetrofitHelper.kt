@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 object RetrofitHelper {
     var httpClient = OkHttpClient.Builder()
@@ -15,7 +16,11 @@ object RetrofitHelper {
         logInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY) //adding interceptor to log the request-params and its response
         httpClient.addInterceptor(
             Interceptor { chain ->
-                chain.proceed(chain.request())
+                val request = chain.request()
+                val newRequest =
+                    request.newBuilder().addHeader("Authorization", "")
+                        .header("User-Agent", "PostmanRuntime/7.29.2")
+                chain.proceed(newRequest.build())
             }).addInterceptor(logInterceptor)
 
         val gson = GsonBuilder()
@@ -25,6 +30,7 @@ object RetrofitHelper {
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(httpClient.build())
+
             .build()
         return retrofit.create(APIService::class.java)
     }
